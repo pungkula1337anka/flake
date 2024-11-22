@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Define colors
+COLORS=('\033[0;32m' '\033[0;34m' '\033[0;36m' '\033[0;35m')
+NC='\033[0m' # No color
+
+# Split PATH by ':' and store in array
+IFS=':' read -ra PATHS <<< "$PATH"
+
+# Sort and display each path with alternating colors
+echo -e "Paths in \$PATH (sorted alphabetically):"
+sorted_paths=($(for path in "${PATHS[@]}"; do echo "$path"; done | sort))
+
+for i in "${!sorted_paths[@]}"; do
+    color=${COLORS[i % ${#COLORS[@]}]}  # Cycle through colors
+    echo -e "${color}${sorted_paths[i]}${NC}"
+done
