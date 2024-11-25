@@ -1,9 +1,8 @@
 { config, pkgs, lib, inputs, user, ... }:
 {
-
-
-  # Define a user account. Don't forget to set a password with ‘passwd’.
+    users.defaultUserShell = pkgs.bash; 
     users.users.${user} = {
+      hashedPassword = "$6$ywtdfbhjDtQE9b5s$fPIAqx0fCkd2G07Sz8SeJzr.Ds.yFb69SEJL3Oj.o6crBAXH3ExWdZnlwGIsbeSPAkB4QR.fazgVfHZW0gwvf0";
       isNormalUser = true;
       description = "${user}";
       extraGroups = [ "networkmanager" "wheel" "qemu-libvirtd" "libvirtd" "kvm" "docker" "amdgpu" ];
@@ -13,6 +12,7 @@
       ];
       openssh.authorizedKeys.keys = [
         "ssh-rsa x7qq8zRAH5jdxUduQ/ThAmvjYm91H42QVm70OCFjjb8dg9LIb/va2j1eakNlBiwCmUK7frmRkWjFj+2t5zCTd2iLpygLv7PvFVIidxAoXLdTxilAAg2ZlX/xSGvRPkaqX/ZQfR5j3OCVYy6aV4VonbIUids7kUynRz9SRN2AHmLpK/oniwlwhAS5aa0PvC8Ln7x3wzhH501sLKk+krNpOEr4E1AA/VwOMqSqU4KTMoYzkUix9YnnAf70AQV6rZ4NxNrqWcZve/UGqMxtUbxMP7rL8hxKihc0Zdus5zxDEZ36oXIDYq9kQ3KgJZx4aVPePEX68A8fxhx6zIOfsg0Hz6M3ko53MhG/qZhYmDvTG1548tgn24gQjEawRjUc2a6gEH+va+TP99260ELeWZD3AHzIzL+ln4BBGcYgNglkIxpI5gH7LqeQ+XHlW8iQbnlfRUYKo72MGA8KLDPP3IHhWa5cSN4DKBlgEJ8ijUbcYqES4dK34cqyM1JWVTnEdw== pungkula@desktop.com"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE6UXhj/qh1qSnHdAuPyOUr0OQyJ1QIy5QlZu3y7CaGV pungkula@desktop"
       ];
     };
 
@@ -30,10 +30,8 @@
         terminal = "kitty";
       };
     services.gvfs.enable = true; 
-
-  # gnome outside gnome
     programs.dconf.enable = lib.mkDefault true;
-
+    
   # DIRS
     environment.etc."xdg/user-dirs.defaults".text= ''
     DESKTOP=$HOME/duckOS
@@ -44,9 +42,6 @@
     MUSIC=$HOME/Music
     PICTURES=$HOME/Photos
     VIDEOS=$HOME/Video 
-    '';
-
-
-    users.defaultUserShell = pkgs.bash;   
+    '';  
 }
 

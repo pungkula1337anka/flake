@@ -5,9 +5,10 @@ in
 {
   # Import keybindings
   imports = [
-#    (import home-manager)
-    ./dconf.nix
+    #(import home-manager)
+    ./nixos/dconf.nix
     ./programs/myfox.nix 
+ #   ./programs/yubikey-touch.nix
   #  ./../../programs/mywolf.nix 
   ];
 
@@ -115,5 +116,7 @@ in
          XDG_BIN_HOME = "\${HOME}/flake/home/bin";
          #XDG_DATA_HOME = "\${HOME}/.local/share";
     };
+    
+
 }
 

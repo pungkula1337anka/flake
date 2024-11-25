@@ -3,13 +3,13 @@
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
 { config, pkgs, lib, inputs, modulesPath, ... }:
 {
-    imports = [ ./hardware-configuration.nix
-                 ./../../modules/nixos/battery.nix
-                 ./../../modules/nixos/users.nix
-                 ./../../modules/services/voice.nix
-               #  ./../../programs/myfox.nix
+    imports = [
+        ./hardware-configuration.nix
+        ./../../modules/hardware/battery.nix
+        ./../../modules/nixos/users.nix
+        ./../../modules/services/voice.nix
     ];
-
+ 
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
 #°•──→ BOOTLOADER ←──•°
@@ -27,10 +27,10 @@
     nix.optimise.automatic = true;
     nixpkgs.config.allowUnfree = true;
     nix = {
-      package = pkgs.nixFlakes;
-      extraOptions = ''
-        experimental-features = nix-command flakes
-      '';
+        package = pkgs.nixFlakes;
+        extraOptions = ''
+            experimental-features = nix-command flakes
+        '';
     };
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
@@ -153,6 +153,7 @@
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
 #°•──→ SERVICES ←──•°
+    services.pcscd.enable = true; # Yubikey Smart Card
     services.xserver.enable = true; # Enable the X11 windowing system.
     services.flatpak.enable = true;
     services.locate.enable = true;
@@ -201,13 +202,28 @@
 #──→ SYSTEM PACKAGES ←──
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
     environment.systemPackages = with pkgs; [
-      pkgs.fido2luks
+      pkgs.pcsclite
+      pkgs.python312Packages.tqdm
+      pkgs.python312Packages.deploykit
+      pkgs.nixos-anywhere
+      pkgs.yubico-piv-tool
+      pkgs.age-plugin-yubikey
+      pkgs.pam_u2f
+      pkgs.piv-agent
+      pkgs.yubico-piv-tool
+   #  pkgs.hidapi
+      pkgs.python312Packages.invoke
+      pkgs.python312Packages.deploykit
+      pkgs.atuin
+      pkgs.pcsc-tools
+      pkgs.acsccid
+      pkgs.signal-desktop
       pkgs.sops
-      pkgs.firefox
-      pkgs.kustomize-sops
     # pkgs.rocmPackages_5.rpp-opencl
     # pkgs.crackle # crack and decrypt BLE
     # pkgs.bruteforce-luks
+      pkgs.python312Packages.paramiko
+      pkgs.python312Packages.requests
       pkgs.angryipscanner
       pkgs.python312Packages.nmapthon2
       pkgs.rocmPackages_5.rocm-runtime
@@ -220,13 +236,9 @@
       pkgs.nmap
       pkgs.hashcat
       pkgs.rocmPackages_5.rpp-opencl
-      pkgs.vim-full
-      pkgs.gef
-      pkgs.rage
       pkgs.libfido2
       pkgs.liboqs
       pkgs.python312Packages.fido2
-      python312Packages.requests
       pkgs.python312Packages.colorlog
       pkgs.mount
       pkgs.sqlite
@@ -241,20 +253,11 @@
       pkgs.python311Packages.aiovlc
       pkgs.ntfy-sh
       pkgs.maestro # Mobile UI Automation Tool
-      pkgs.python312Packages.inkex #inkscape
-      pkgs.inkscape-with-extensions
       pkgs.python312Packages.setuptools
-      pkgs.traefik
-      pkgs.authelia
-      pkgs.yai
       pkgs.fzf
       pkgs.snapcast
       pkgs.unbound
       pkgs.airscan
-      pkgs.passExtensions.pass-import
-      pkgs.passff-host
-      pkgs.gnomecast
-      pkgs.gnomeExtensions.messaging-menu
       pkgs.gnome.gnome-software
       pkgs.gnome.gnome-system-monitor
       pkgs.gnome.gnome-themes-extra
@@ -282,9 +285,6 @@
       libykclient
       yubikey-agent
       yubico-piv-tool
-      age-plugin-yubikey
-      yubikey-personalization-gui
-      yubikey-personalization
       pkgs.age
       pkgs.pcsclite
       pkgs.pcscliteWithPolkit
@@ -347,19 +347,19 @@
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
    networking.firewall.enable = true;
    networking.firewall.allowedUDPPorts = [
-     1337
-     7777
-     11434
-     6333
-     11000
+   #  1337
+   #  7777
+   #  11434
+   #  6333
+  #   11000
    ];
   networking.firewall.allowedTCPPorts = [
    # 5900 # vnc
-    1337
-    7777
-    11434
-    6333
-    11000
+  #  1337
+  #  7777
+  #  11434
+ #   6333
+ #   11000
   ];
   sops = {
     defaultSopsFile = "/var/lib/sops-nix/.sops.yaml";
@@ -395,6 +395,34 @@
     group = "secretservice";
   };
   users.groups.secretservice = { };
+
+  security.pam.u2f = {
+    enable = true;
+    interactive = false; # Prompts for Enter
+    cue = true; # Prompts for Touch
+  };
+  
+  security.pam.services = {
+    login.u2fAuth = true;
+    sudo.u2fAuth = true;
+  };
+
+  security.pam.yubico = {
+     enable = true;
+     debug = true;
+     mode = "challenge-response";  
+     id = [ "16644366" ];
+  };
+
+  services.udev.extraRules = ''
+    ACTION=="remove",\
+    ENV{ID_BUS}=="usb",\
+    ENV{ID_MODEL_ID}=="0407",\
+    ENV{ID_VENDOR_ID}=="1050",\
+    ENV{ID_VENDOR}=="Yubico",\
+    RUN+="${pkgs.systemd}/bin/loginctl lock-sessions"
+ '';
+ 
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
 #──→ CROSS ENV ←──

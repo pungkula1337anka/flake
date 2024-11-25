@@ -30,14 +30,12 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.extraSpecialArgs = {inherit user;};
-              home-manager.users.${user} = import ./modules/home/gnome/home.nix;
+              home-manager.users.${user} = import ./modules/home.nix;
             }
-            #agenix.nixosModules.age
-            #agenix.nixosModules.default
             sops-nix.nixosModules.sops
             ./modules/services/ssh.nix                 
             ./modules/shell/bash.nix
-           # ./modules/monero.nix
+           # ./yubikey.nix
           ];
         };
         # -> PHONE <- #
@@ -50,7 +48,7 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.extraSpecialArgs = {inherit user;};
-              home-manager.users.${user} = import ./modules/home/gnome/home.nix;
+              home-manager.users.${user} = import ./modules/home.nix;
             }
           ];
         };
@@ -59,12 +57,13 @@
           inherit system;
           specialArgs = {inherit user;};
           modules = [ ./hosts/laptop/configuration.nix
+            ./hosts/laptop/disk-config.nix
             home-manager.nixosModules.home-manager
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.extraSpecialArgs = {inherit user;};
-              home-manager.users.${user} = import ./modules/home/gnome/home.nix;
+              home-manager.users.${user} = import ./modules/home.nix;
             }
             sops-nix.nixosModules.sops
             ./modules/services/ssh.nix

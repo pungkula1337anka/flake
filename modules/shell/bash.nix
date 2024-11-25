@@ -13,7 +13,7 @@
     
     shellAliases = {
       # NIX OS
-      switch = "cd && cd duckOS/flake && sudo nixos-rebuild switch --flake .#desktop --show-trace ";
+      switch = "cd && cd flake && sudo nixos-rebuild switch --flake .#desktop --show-trace ";
       clean = "nix-collect-garbage";
       cleanold = "nix-collect-garbage -d";
       # DUCK DUCK GO

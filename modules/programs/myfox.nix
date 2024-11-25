@@ -27,7 +27,12 @@ in
     programs.firefox.policies = {
       BlockAboutAddons = true;
       ExtensionSettings = {
-        "*".installation_mode = "blocked";
+        "*".installation_mode = "blocked";        
+        # Super Dark Mode
+        "{be3295c2-d576-4a7c-9987-a21844164dbb}" = {
+            install_url = "https://addons.mozilla.org/firefox/downloads/file/4062840/super_dark_mode-5.0.2.5.xpi";
+            installation_mode = "force_installed";
+        }; 
         "uBlock0@raymondhill.net" = {
           userSettings = {
             uiTheme = "dark";

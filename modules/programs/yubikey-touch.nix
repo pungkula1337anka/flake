@@ -27,6 +27,6 @@
   };
 
   # Optionally, ensure `gnupg` is installed
-  environment.systemPackages = [ pkgs.gnupg ];
+ # environment.systemPackages = [ pkgs.gnupg ];
 }
 
