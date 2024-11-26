@@ -3,9 +3,9 @@
 **/key.txt
 **/passwd
 **/log
-modules/dump/
-modules/docker/
-home/.config/
+/modules/dump/
+/modules/docker/
+/home/.config/
 .DS_Store          # macOS file system metadata
 Thumbs.db          # Windows thumbnail cache
 __pycache__/       # Python bytecode cache folder

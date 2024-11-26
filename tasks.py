@@ -42,7 +42,7 @@ def deploy(c, host):
 @task
 def commit(c, host):
     """invoke --commmit . Push and commit flake repository to GitHub."""
-    pass
+    subprocess.run(f"git add -A && git commit -m 'invoke git update' && git push", shell=True)
 
 @task
 def reboot(c, host):

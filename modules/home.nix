@@ -3,7 +3,6 @@ let
   home-manager = builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/master.tar.gz";
 in
 {
-  # Import keybindings
   imports = [
     #(import home-manager)
     ./nixos/dconf.nix
@@ -64,13 +63,13 @@ in
   };
   # Home packages
   home.packages = with pkgs; [
+    firefox
     chromium
     neovim
     librewolf
     libsForQt5.qt5.qtwayland
     jellyfin-ffmpeg
     drawing
-    vcard
     vlc
     amberol
     cava
@@ -78,11 +77,20 @@ in
     papirus-icon-theme
     poweralertd
     dbus
-    #gnome-browser-connector
     cudatoolkit
     gnomeExtensions.gsconnect
     vesktop
     keepass
+    gnome.gnome-terminal
+    git
+    wget
+    pass
+    jq
+    direnv
+    nix-direnv
+    sops
+    age
+    
   ];
   #Session variables
      home.sessionVariables = {

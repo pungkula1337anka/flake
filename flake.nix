@@ -67,7 +67,7 @@
             }
             sops-nix.nixosModules.sops
             ./modules/services/ssh.nix
-            ./modules/shell/bash2.nix
+            ./modules/shell/bash.nix
           ];
         };
       };
