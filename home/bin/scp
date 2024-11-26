@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Prompt for the user from whom you want to transfer
+read -p "Username to transfer FROM: " PROMPT1
+
+# Prompt for the computer you want to transfer from
+read -p "Enter the computer (hostname or IP address) you want to transfer FROM: " PROMPT2
+
+# Prompt for the folder you wish to transfer
+read -p "Enter the folder name you wish to transfer: " PROMPT3
+
+# Run the scp command using the provided inputs
+scp -r "$PROMPT1@$PROMPT2:/home/$PROMPT1/$PROMPT3" /home/pungkula/scp
+
+# Notify user of completion
+echo "Transfer complete!"
+

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Get the hostname
+HOSTNAME=$(hostname)
+
+# Run nixos-rebuild with the hostname
+sudo nixos-rebuild switch --flake .#"${HOSTNAME}" --show-trace
