@@ -31,7 +31,7 @@
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
 #°•──→ NETWORK ←──•°
-  networking.hostName = "laptop; # Define your hostname.
+  networking.hostName = "laptop"; # Define your hostname.
   networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
   # Enable networking
   networking.networkmanager.enable = true;
@@ -138,5 +138,5 @@
   ];
 
 
-  system.stateVersion = "24.05"; # Did you read the comment?
+  system.stateVersion = "22.11"; # Did you read the comment?
 }
