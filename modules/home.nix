@@ -71,6 +71,7 @@ in
     jellyfin-ffmpeg
     drawing
     vlc
+    github-desktop
     amberol
     cava
     nordic
