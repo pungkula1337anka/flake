@@ -1,0 +1,227 @@
+#!/usr/bin/env bash
+set -eufo pipefail
+
+showUsage() {
+  cat <<USAGE
+Usage: nixos-remote [options] ssh-host
+
+Options:
+
+* -f, --flake flake
+  set the flake to install the system from
+* -s, --store-paths
+  set the store paths to the disko-script and nixos-system directly
+  if this is give, flake is not needed
+* --no-ssh-copy
+  skip copying ssh-keys to target system
+* --kexec url
+  use another kexec tarball to bootstrap NixOS
+* --stop-after-disko
+  exit after disko formating, you can then proceed to install manually or some other way
+* --extra-files files
+  files to copy into the new nixos installation
+* --debug
+  enable debug output
+USAGE
+}
+
+abort() {
+  echo "aborted: $*" >&2
+  exit 1
+}
+
+kexec_url=https://github.com/nix-community/nixos-images/releases/download/nixos-22.11/nixos-kexec-installer-x86_64-linux.tar.gz
+debug=n
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -f | --flake)
+      flake=$2
+      shift
+      ;;
+    -s | --store-paths)
+      disko_script=$2
+      nixos_system=$3
+      shift
+      shift
+      ;;
+    --help)
+      showUsage
+      exit 0
+      ;;
+    --kexec)
+      kexec_url=$2
+      shift
+      ;;
+    --no-ssh-copy-id)
+      no_ssh_copy=y
+      ;;
+    --debug)
+      debug=y
+      set -x
+      ;;
+    --extra-files)
+      extra_files=$2
+      shift
+      ;;
+    --stop-after-disko)
+      stop_after_disko=y
+      ;;
+    *)
+      if [[ -z ${ssh_connection:-} ]]; then
+        if [[ "$1" =~ ^ssh:// ]]; then
+          ssh_connection=$1
+        else
+          ssh_connection="ssh://$1"
+        fi
+      else
+        showUsage
+        exit 1
+      fi
+      ;;
+  esac
+  shift
+done
+
+
+# ssh wrapper
+timeout_ssh_() {
+  timeout 10 ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$ssh_connection" "$@"
+}
+ssh_() {
+  ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$ssh_connection" "$@"
+}
+nixCopy() {
+  NIX_SSHOPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' nix copy --extra-experimental-features nix-command "$@"
+}
+nix_build() {
+  nix \
+    --experimental-features flakes build \
+    --extra-experimental-features nix-command \
+    --no-write-lock-file \
+    --print-out-paths \
+    "$@"
+}
+
+if [[ -z ${ssh_connection:-} ]]; then
+  abort "ssh-host must be set"
+fi
+
+# parse flake nixos-install style syntax, get the system attr
+if [[ -n "${flake:-}" ]]; then
+  if [[ $flake =~ ^(.*)\#([^\#\"]*)$ ]]; then
+   flake="${BASH_REMATCH[1]}"
+   flakeAttr="${BASH_REMATCH[2]}"
+  fi
+  if [[ -z "${flakeAttr:-}" ]]; then
+    echo "Please specify the name of the NixOS configuration to be installed, as a URI fragment in the flake-uri."
+    echo "For example, to use the output nixosConfigurations.foo from the flake.nix, append \"#foo\" to the flake-uri."
+    exit 1
+  fi
+  disko_script=$(nix_build "${flake}#nixosConfigurations.${flakeAttr}.config.system.build.disko")
+  nixos_system=$(nix_build "${flake}#nixosConfigurations.${flakeAttr}.config.system.build.toplevel")
+elif [[ -n "${disko_script:-}" ]] && [[ -n "${nixos_system:-}" ]]; then
+  if [[ ! -e "${disko_script}" ]] || [[ ! -e "${nixos_system}" ]]; then
+    echo "${disko_script} and ${nixos_system} must be existing store-paths"
+    exit 1
+  fi
+  :
+else
+  abort "flake must be set"
+fi
+
+
+# wait for machine to become reachable (possibly forever)
+if [[ ${no_ssh_copy-n} != "y" ]]; then
+  until ssh-copy-id -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$ssh_connection"; do sleep 5; done
+else
+  until ssh_ -o ConnectTimeout=10 -- exit 0; do sleep 5; done
+fi
+
+# first check if the remote system is kexec booted
+if ssh_ -- test -e /etc/is_kexec; then
+  is_kexec=y
+fi
+
+if [[ ${is_kexec-n} != "y" ]]; then
+  # TODO we probably need an architecture detection here
+  ssh_ << SSH
+set -efu
+if [ "$debug" = "y" ]; then
+  set -x
+fi
+os=\$(uname)
+if [[ "\$os" != "Linux" ]]; then
+  echo "This script requires Linux as the operating system, but got \${os}" >&2
+  exit 1
+fi
+if ! command -v tar >/dev/null 2>&1; then
+  echo "no tar command found, but required to unpack kexec tarball" >&2
+  exit 1
+fi
+
+rm -rf /root/kexec
+mkdir -p /root/kexec
+SSH
+
+if [[ -f "$kexec_url" ]]; then
+  ssh_ 'tar -C /root/kexec -xvzf-' < "$kexec_url"
+else
+  ssh_ << SSH
+set -eu -o pipefail
+if [ "$debug" = "y" ]; then
+  set -x
+fi
+fetch(){
+  if command -v curl >/dev/null 2>&1; then
+    curl --fail -Ss -L "\$1"
+  elif command -v wget >/dev/null 2>&1; then
+    wget "\$1" -O-
+  elif command -v apt-get >/dev/null 2>&1; then
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update
+    apt-get install -y curl
+    curl --fail -Ss -L "\$1"
+  else
+    echo "no downloader (curl or wget) found, bailing out" >&2
+    exit 1
+  fi
+}
+fetch "$kexec_url" | tar -C /root/kexec -xvzf-
+SSH
+fi
+
+ssh_ << SSH
+export TMPDIR=/root/kexec
+setsid /root/kexec/kexec/run
+SSH
+
+  # wait for machine to become unreachable
+  while timeout_ssh_ -- exit 0; do sleep 1; done
+
+  # watiting for machine to become available again
+  until ssh_ -o ConnectTimeout=10 -- exit 0; do sleep 5; done
+fi
+
+nixCopy --to "$ssh_connection" "$disko_script"
+ssh_ "$disko_script"
+
+if [[ ${stop_after_disko-n} == "y" ]]; then
+  exit 0
+fi
+
+nixCopy --to "$ssh_connection?remote-store=local?root=/mnt" "$nixos_system"
+if [[ -n ${extra_files:-} ]]; then
+  if [[ -d "$extra_files" ]]; then
+    extra_files="$extra_files/"
+  fi
+  rsync -vaAXF -e "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" "$extra_files" "${ssh_connection#ssh://}:/mnt/"
+fi
+ssh_ << SSH
+set -efu
+if [ "$debug" = "y" ]; then
+  set -x
+fi
+nixos-install --no-root-passwd --no-channel-copy --system "$nixos_system"
+reboot
+SSH
