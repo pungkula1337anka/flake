@@ -89,7 +89,7 @@
      ];
       path = with pkgs; [
         gawk
-       pulseaudio
+        pulseaudio
       ];
       script = ''
         pactl load-module module-pipe-sink file=/run/snapserver/pipewire sink_name=Snapcast format=s16le rate=48000
@@ -204,6 +204,7 @@
     environment.systemPackages = with pkgs; [
       pkgs.pcsclite
       pkgs.python312Packages.tqdm
+      pkgs.python312Packages.rich
       pkgs.python312Packages.deploykit
       pkgs.nixos-anywhere
       pkgs.yubico-piv-tool
@@ -350,7 +351,8 @@
    #  1337
    #  7777
    #  11434
-   #  6333
+     1704
+     1705
   #   11000
    ];
   networking.firewall.allowedTCPPorts = [
@@ -358,7 +360,8 @@
   #  1337
   #  7777
   #  11434
- #   6333
+    1704
+    1705
  #   11000
   ];
   sops = {
@@ -396,32 +399,32 @@
   };
   users.groups.secretservice = { };
 
-  security.pam.u2f = {
-    enable = true;
-    interactive = false; # Prompts for Enter
-    cue = true; # Prompts for Touch
-  };
+#  security.pam.u2f = {
+#    enable = true;
+#    interactive = false; # Prompts for Enter
+#    cue = true; # Prompts for Touch
+#  };
   
-  security.pam.services = {
-    login.u2fAuth = true;
-    sudo.u2fAuth = true;
-  };
+#  security.pam.services = {
+#    login.u2fAuth = true;
+#    sudo.u2fAuth = true;
+#  };
 
-  security.pam.yubico = {
-     enable = true;
-     debug = true;
-     mode = "challenge-response";  
-     id = [ "16644366" ];
-  };
+#  security.pam.yubico = {
+#     enable = true;
+#     debug = true;
+#     mode = "challenge-response";  
+#     id = [ "16644366" ];
+#  };
 
-  services.udev.extraRules = ''
-    ACTION=="remove",\
-    ENV{ID_BUS}=="usb",\
-    ENV{ID_MODEL_ID}=="0407",\
-    ENV{ID_VENDOR_ID}=="1050",\
-    ENV{ID_VENDOR}=="Yubico",\
-    RUN+="${pkgs.systemd}/bin/loginctl lock-sessions"
- '';
+#  services.udev.extraRules = ''
+#    ACTION=="remove",\
+#    ENV{ID_BUS}=="usb",\
+#    ENV{ID_MODEL_ID}=="0407",\
+#    ENV{ID_VENDOR_ID}=="1050",\
+#    ENV{ID_VENDOR}=="Yubico",\
+#    RUN+="${pkgs.systemd}/bin/loginctl lock-sessions"
+# '';
  
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°

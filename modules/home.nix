@@ -91,7 +91,7 @@ in
     nix-direnv
     sops
     age
-    
+    python312Packages.rich
   ];
   #Session variables
      home.sessionVariables = {
