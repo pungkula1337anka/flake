@@ -5,8 +5,8 @@
     ./hardware-configuration.nix
     ./../../modules/hardware/battery.nix
     ./../../modules/nixos/users.nix
- #   ./disk-config.nix
-    inputs.disko.nixosModules.disko
+    ./disk-config.nix
+ #   inputs.disko.nixosModules.disko
   ];
 
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
@@ -139,8 +139,9 @@
   environment.systemPackages = with pkgs; [
     git
     curl
+    wget
     gnome.gnome-terminal
   ];
 
-  system.stateVersion = "22.11"; # Did you read the comment?
+  system.stateVersion = "22.11";
 }
