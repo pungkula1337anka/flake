@@ -5,19 +5,14 @@ import socket
 import sys
 import time
 from pathlib import Path
-#from tempfile import TemporaryDirectory
+from tempfile import TemporaryDirectory
 import tempfile
 from invoke import task
 
-#from rich.console import Console
-#from rich.text import Text
-#from rich.table import Table
+
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
 #──→ SETTINGS ←──
-#console = Console()
-
-
 
 ROOT = Path(__file__).parent.resolve()
 os.chdir(ROOT)
@@ -106,34 +101,31 @@ def install(c, host: str) -> None:
         print("Installation aborted.")
         return
 
-    #with TemporaryDirectory() as temp_dir:
-        #root = Path(temp_dir) / "root"
-        #root.mkdir(parents=True, exist_ok=True)
-        #root.chmod(0o755)
+    # Path to your SSH public key
+    ssh_key_source = Path("/home/pungkula/.ssh/id_ed25519.pub")
+    if not ssh_key_source.exists():
+        print(f"SSH public key not found: {ssh_key_source}")
+        return
 
-        # Path to the original SSH key
-        #ssh_key_source = Path("/home/pungkula/.ssh/id_ed25519.pub")
-        
-        # Ensure the destination directory exists
-        #host_key_dest = root / "tmp/ssh_host_ed25519_key"
-        #host_key_dest.parent.mkdir(parents=True, exist_ok=True)  # Create the parent directory
-        
-        # Copy the SSH key to the temporary directory (tmp folder)
-        #shutil.copy(ssh_key_source, host_key_dest)
-        
-        # Make sure the permissions are correct for the SSH key
-        #host_key_dest.chmod(0o600)
+    # Create a temporary directory to stage files
+    with TemporaryDirectory() as temp_dir:
+        temp_dir_path = Path(temp_dir)
+        extra_files_dir = temp_dir_path / "extra-files"
+        extra_files_dir.mkdir(parents=True, exist_ok=True)
 
-    try:
-        # Command to install NixOS using nixos-anywhere
-        #pubkeys = "/home/pungkula/.ssh/extra-files/.ssh"
-        c.run(
-            f"nix run github:nix-community/nixos-anywhere -- --generate-hardware-config nixos-generate-config ./hosts/{host}/hardware-configuration.nix --debug --flake .#{host} --copy-host-keys root@laptop",
-            echo=True,
-        )
-    except Exception as e:
-        print(f"Error during installation: {e}")
+        # Copy the SSH public key to the temporary directory
+        ssh_key_dest = extra_files_dir / "id_ed25519.pub"
+        shutil.copy(ssh_key_source, ssh_key_dest)
 
+        # Run nixos-anywhere with the prepared files
+        pubkeys = "/home/pungkula/.ssh/extra-files/"
+        try:
+            c.run(
+                 f"nix run github:numtide/nixos-anywhere -- --debug --flake .#{host} --extra-files {pubkeys}",
+                echo=True,
+            )
+        except Exception as e:
+            print(f"Error during installation: {e}")
 
 
 
@@ -145,37 +137,54 @@ def install(c, host: str) -> None:
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
 #──→ LOGS ←──
+from invoke import task
+import re  # For extracting and formatting timestamps
+
+# ANSI escape codes for clear and simple colors
+class Colors:
+    RESET = "\033[0m"
+    RED = "\033[31;1m"  # Bright red for critical errors
+    YELLOW = "\033[33;1m"  # Bright yellow for warnings
+    GREEN = "\033[32m"  # Green for general information
+    CYAN = "\033[36m"  # Cyan for less critical info
+    BOLD = "\033[1m"  # Bold text
+
+def color_text(text, color):
+    """Apply color to text."""
+    return f"{color}{text}{Colors.RESET}"
+
+def format_time(log):
+    """Extract and format time as HH:MM from a log line."""
+    match = re.search(r"\b(\d{2}):(\d{2}):\d{2}\b", log)  # Match HH:MM:SS
+    if match:
+        return f"{match.group(1)}:{match.group(2)}"
+    return "--:--"  # Default for missing time
+
 @task
 def logs(ctx, host, lines=50):
-    """Displays logs from the specified host machine."""
-    console.print(f"[bold green]Fetching logs from {host}...[/bold green]")
+    """Fetches and displays logs from the specified host."""
+    print(color_text(f"\nFetching logs from {host}...\n", Colors.GREEN))
     result = ctx.run(f"ssh {host} 'sudo journalctl -xe | tail -n {lines}'", hide=True)
     logs = result.stdout.splitlines()
 
-    # Create a table to display logs
-    table = Table(show_header=True, header_style="bold cyan")
-    table.add_column("Timestamp", style="dim", no_wrap=True)
-    table.add_column("Service", style="magenta")
-    table.add_column("Message", style="white")
+    if not logs:
+        print(color_text("No logs found.", Colors.CYAN))
+        return
 
     for log in logs:
-        if "timestamp" in log.lower():  # Replace with actual timestamp detection logic
-            timestamp, service, message = parse_log_entry(log)
-            table.add_row(timestamp, service, message)
+        timestamp = format_time(log)  # Extract and format time
+        if "critical" in log.lower():  # Detect critical logs
+            print(color_text(f"{timestamp} [CRITICAL] " + log, Colors.RED))
+        elif "error" in log.lower():  # Detect errors
+            print(color_text(f"{timestamp} [ERROR]    " + log, Colors.YELLOW))
+        elif "warning" in log.lower():  # Detect warnings
+            print(color_text(f"{timestamp} [WARNING]  " + log, Colors.CYAN))
         else:
-            table.add_row("[dim]-[/dim]", "[dim]-[/dim]", log)
+            print(color_text(f"{timestamp} [INFO]     " + log, Colors.GREEN))
+        
+        print("")  # Add a blank line for separation
 
-    console.print(table)
-
-def parse_log_entry(log):
-    """Parses a log entry into timestamp, service, and message parts."""
-    parts = log.split()  # Simplistic split logic; adjust for actual log format
-    timestamp = " ".join(parts[:2])  # Adjust to capture timestamp (e.g., "2024-11-26 14:32:01")
-    service = parts[2] if len(parts) > 2 else "Unknown"
-    message = " ".join(parts[3:]) if len(parts) > 3 else "No message"
-    return timestamp, service, message
-
-
+    print(color_text("\nLog fetching completed.\n", Colors.GREEN))
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
 #──→ HARDWARE ANALYSIS ←──

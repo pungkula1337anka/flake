@@ -3,6 +3,7 @@
 {
   programs.bash = {
     shellInit = ''
+      export PATH=$PATH:/home/pungkula/flake/home/bin
       echo "🦆🦆🦆🦆🦆🦆🦆"
       echo "😻😻😻😻😻😻😻"
       echo "🦆🦆🦆🦆🦆🦆🦆"
@@ -25,7 +26,7 @@
       # Customize the prompt
       PS1="\[\e[32m\]\u@\h:\w\[\e[m\] \$ "
       export PYTHONSTARTUP="/home/pungkula/flake/home/.pythonrc"
-      export PATH="/home/pungkula/flake/home/bin:$PATH"      
+      export PATH=$PATH:/home/pungkula/flake/home/bin   
       # Enable command auto-completion
       shopt -s histappend
       shopt -s autocd  # auto-cd to directories

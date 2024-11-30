@@ -164,6 +164,7 @@
     services.xserver.displayManager.gdm.enable = true;
     services.xserver.displayManager.gdm.wayland = true;
     services.xserver.desktopManager.gnome.enable = true;
+    #services.screen-locker.inactiveInterval = 60;
       environment.gnome.excludePackages = 
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°   
 #°•──→ GNOME EXCLUDE ←──•°
@@ -202,9 +203,11 @@
 #──→ SYSTEM PACKAGES ←──
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
     environment.systemPackages = with pkgs; [
+      pkgs.home-manager
       pkgs.pcsclite
       pkgs.python312Packages.tqdm
       pkgs.python312Packages.rich
+      pkgs.python312Packages.texttable
       pkgs.python312Packages.deploykit
       pkgs.nixos-anywhere
       pkgs.yubico-piv-tool

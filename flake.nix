@@ -36,7 +36,8 @@
               home-manager.extraSpecialArgs = {inherit user;};
               home-manager.users.${user} = import ./modules/home.nix;
             }
-            ./modules/services/ssh.nix                 
+            ./modules/services/ssh.nix 
+         #   ./modules/services/atuin.nix
             ./modules/shell/bash.nix
            # ./yubikey.nix
           ];

@@ -35,7 +35,7 @@ in
   programs.home-manager.enable = true;
   home.username = "${user}";
   home.homeDirectory = "/home/${user}";
-  home.stateVersion = "23.05";
+  home.stateVersion = "22.11";
   # GTK customization
   gtk = {
     enable = true;
@@ -92,6 +92,9 @@ in
     sops
     age
     python312Packages.rich
+    atuin
+    prometheus
+    syslogng
   ];
   #Session variables
      home.sessionVariables = {
@@ -125,7 +128,5 @@ in
          XDG_BIN_HOME = "\${HOME}/flake/home/bin";
          #XDG_DATA_HOME = "\${HOME}/.local/share";
     };
-    
-
 }
 
