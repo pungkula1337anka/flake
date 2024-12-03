@@ -1,4 +1,7 @@
 { config, pkgs,  ... }:
+let
+  pkgs = import <nixpkgs> {};
+in
 {
   systemd.user.services.snapclient-local = {
     wantedBy = [
