@@ -178,6 +178,7 @@
     wget
     iwd
     gnome.gnome-terminal
+    snapcast
   ];
 
   system.stateVersion = "22.11";
