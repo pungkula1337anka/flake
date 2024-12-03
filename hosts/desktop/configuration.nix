@@ -207,7 +207,7 @@
     environment.systemPackages = with pkgs; [
       pkgs.home-manager
       pkgs.pcsclite
-
+      pkgs.snapcast
       pkgs.nixos-anywhere
       pkgs.yubico-piv-tool
       pkgs.age-plugin-yubikey
