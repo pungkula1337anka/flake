@@ -72,7 +72,7 @@
             }
             ./modules/services/ssh.nix
             ./modules/shell/bash.nix
-            ./modules/services/snapcast-client.nix
+          #  ./modules/services/snapcast-client.nix
           ];
         };
       };
