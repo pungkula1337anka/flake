@@ -39,7 +39,7 @@
             ./modules/services/ssh.nix 
          #   ./modules/services/atuin.nix
             ./modules/shell/bash.nix
-           # ./yubikey.nix
+         #   ./modules/networking/proton-ovpn.nix
           ];
         };
         # -> PHONE <- #
@@ -72,6 +72,7 @@
             }
             ./modules/services/ssh.nix
             ./modules/shell/bash.nix
+            ./modules/services/snapcast-client.nix
           ];
         };
       };

@@ -10,6 +10,8 @@
         ./../../modules/services/voice.nix
     ];
  
+
+ 
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
 #°•──→ BOOTLOADER ←──•°
@@ -205,10 +207,7 @@
     environment.systemPackages = with pkgs; [
       pkgs.home-manager
       pkgs.pcsclite
-      pkgs.python312Packages.tqdm
-      pkgs.python312Packages.rich
-      pkgs.python312Packages.texttable
-      pkgs.python312Packages.deploykit
+
       pkgs.nixos-anywhere
       pkgs.yubico-piv-tool
       pkgs.age-plugin-yubikey
@@ -216,8 +215,6 @@
       pkgs.piv-agent
       pkgs.yubico-piv-tool
    #  pkgs.hidapi
-      pkgs.python312Packages.invoke
-      pkgs.python312Packages.deploykit
       pkgs.atuin
       pkgs.pcsc-tools
       pkgs.acsccid
@@ -242,8 +239,7 @@
       pkgs.rocmPackages_5.rpp-opencl
       pkgs.libfido2
       pkgs.liboqs
-      pkgs.python312Packages.fido2
-      pkgs.python312Packages.colorlog
+
       pkgs.mount
       pkgs.sqlite
       pkgs.duckdb
@@ -257,7 +253,7 @@
       pkgs.python311Packages.aiovlc
       pkgs.ntfy-sh
       pkgs.maestro # Mobile UI Automation Tool
-      pkgs.python312Packages.setuptools
+
       pkgs.fzf
       pkgs.snapcast
       pkgs.unbound
@@ -309,11 +305,7 @@
       pass 
       pkgs.caddy
       pkgs.xcaddy
-      pkgs.python312Packages.wyoming
-      pkgs.python312Packages.duckduckgo-search
       pkgs.cmake
-      python3
-      python312Packages.pip
       pkgs.webfontkitgenerator
       pkgs.ddgr
       pkgs.godns
@@ -372,13 +364,21 @@
     defaultSopsFormat = "yaml";
     validateSopsFiles = false;
     age.keyFile = "/var/lib/sops-nix/key.txt";
-    secrets.secretservice = {
-      sopsFile = "/var/lib/sops-nix/secrets/secretservice.json"; # Specify SOPS-encrypted secret file
-      owner = config.users.users.secretservice.name;
-      group = config.users.groups.secretservice.name;
-      mode = "0440"; # Read-only for owner and group
+    secrets = {
+      SHADOWSOCKS_PASSWORD = {
+        sopsFile = "/var/lib/sops-nix/secrets/SHADOWSOCKS_PASSWORD.json"; # Specify SOPS-encrypted secret file
+        owner = config.users.users.secretservice.name;
+        group = config.users.groups.secretservice.name;
+        mode = "0440"; # Read-only for owner and group
+      };
+      secretservice = {
+        sopsFile = "/var/lib/sops-nix/secrets/secretservice.json"; # Specify SOPS-encrypted secret file
+        owner = config.users.users.secretservice.name;
+        group = config.users.groups.secretservice.name;
+        mode = "0440"; # Read-only for owner and group
+      };
     };
-  };
+  };  
   systemd.services.secretservice = {
     script = ''
         echo "
@@ -402,32 +402,32 @@
   };
   users.groups.secretservice = { };
 
-#  security.pam.u2f = {
-#    enable = true;
+  security.pam.u2f = {
+    enable = true;
 #    interactive = false; # Prompts for Enter
-#    cue = true; # Prompts for Touch
-#  };
+    cue = true; # Prompts for Touch
+  };
   
-#  security.pam.services = {
-#    login.u2fAuth = true;
-#    sudo.u2fAuth = true;
-#  };
+  security.pam.services = {
+    login.u2fAuth = true;
+    sudo.u2fAuth = true;
+  };
 
-#  security.pam.yubico = {
-#     enable = true;
-#     debug = true;
-#     mode = "challenge-response";  
-#     id = [ "16644366" ];
-#  };
+  security.pam.yubico = {
+     enable = true;
+     debug = true;
+     mode = "challenge-response";  
+     id = [ "16644366" ];
+  };
 
-#  services.udev.extraRules = ''
-#    ACTION=="remove",\
-#    ENV{ID_BUS}=="usb",\
-#    ENV{ID_MODEL_ID}=="0407",\
-#    ENV{ID_VENDOR_ID}=="1050",\
-#    ENV{ID_VENDOR}=="Yubico",\
-#    RUN+="${pkgs.systemd}/bin/loginctl lock-sessions"
-# '';
+  services.udev.extraRules = ''
+    ACTION=="remove",\
+    ENV{ID_BUS}=="usb",\
+    ENV{ID_MODEL_ID}=="0407",\
+    ENV{ID_VENDOR_ID}=="1050",\
+    ENV{ID_VENDOR}=="Yubico",\
+    RUN+="${pkgs.systemd}/bin/loginctl lock-sessions"
+ '';
  
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
 #°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°°✶.•°•.•°•.•°•.✶°
@@ -449,5 +449,4 @@
 #──→ VERSION ←──
   system.stateVersion = "22.11"; 
 }
-
 

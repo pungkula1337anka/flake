@@ -314,8 +314,8 @@ with lib.hm.gvariant;
     };
 
     "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1" = {
-      binding = "<Control>section";
-      command = "/bin/bash";
+      binding = "section";
+      command = "/etc/profiles/per-user/pungkula/bin/gnome-terminal";
       name = "binbash";
     };
 

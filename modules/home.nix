@@ -11,6 +11,9 @@ in
   #  ./../../programs/mywolf.nix 
   ];
 
+
+
+
   # Enable the direnv integration for your shell (bash or zsh)
   programs.bash.enable = true;
   programs.zsh = {
@@ -83,6 +86,7 @@ in
     vesktop
     keepass
     gnome.gnome-terminal
+    gnome-text-editor
     git
     wget
     pass
@@ -91,11 +95,18 @@ in
     nix-direnv
     sops
     age
-    python312Packages.rich
     atuin
     prometheus
     syslogng
+    python3
+    python312Packages.invoke
+    python312Packages.scp
+    python312Packages.paramiko
+    gum
+    protonvpn-gui
   ];
+  
+
   #Session variables
      home.sessionVariables = {
          BROWSER = "firefox";
@@ -126,7 +137,7 @@ in
          XDG_CACHE_HOME = "\${HOME}/.cache";
          XDG_CONFIG_HOME = "\${HOME}/flake/home/.config";
          XDG_BIN_HOME = "\${HOME}/flake/home/bin";
-         #XDG_DATA_HOME = "\${HOME}/.local/share";
+         XDG_DATA_HOME = "\${HOME}/.local/share";
     };
 }
 
